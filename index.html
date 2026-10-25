@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSGS Clinical Companion · Columbia Variants, Drugs & Genetics</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+        body { background: #f4f7fc; color: #1e2b3c; padding: 1.5rem; line-height: 1.5; }
+        .app { max-width: 1150px; margin: 0 auto; background: white; border-radius: 2rem; box-shadow: 0 15px 35px rgba(0,20,30,0.1); padding: 2rem; }
+        h1 { font-size: 1.9rem; font-weight: 600; letter-spacing: -0.01em; color: #0b2a4a; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; }
+        .subhead { color: #4b6584; margin-bottom: 2rem; border-left: 4px solid #3b8bba; padding-left: 1rem; font-size: 0.95rem; background: #f0f7ff; border-radius: 0 1rem 1rem 0; padding: 0.75rem 1rem; }
+        .tabs { display: flex; gap: 0.5rem; border-bottom: 2px solid #d9e2ec; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .tab-btn { background: none; border: none; padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 500; color: #4b6584; cursor: pointer; border-radius: 0.75rem 0.75rem 0 0; transition: 0.2s; margin-bottom: -2px; border-bottom: 3px solid transparent; }
+        .tab-btn:hover { background: #eaf0f8; color: #0b2a4a; }
+        .tab-btn.active { color: #0b2a4a; border-bottom-color: #0b2a4a; background: #f0f7ff; font-weight: 600; }
+        .panel { display: none; animation: fade 0.25s ease; }
+        .panel.active { display: block; }
+        @keyframes fade { from { opacity: 0.3; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin: 1.5rem 0; }
+        .card { background: #ffffff; border: 1px solid #d9e2ec; border-radius: 1.25rem; padding: 1.25rem 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .card h3 { font-size: 1.1rem; font-weight: 600; color: #0b2a4a; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .badge { display: inline-block; background: #e3f0ff; color: #1a5a8c; border-radius: 30px; padding: 0.2rem 0.75rem; font-size: 0.8rem; font-weight: 600; }
+        .stat { font-size: 2rem; font-weight: 700; color: #0b2a4a; line-height: 1.2; }
+        .stat-label { font-size: 0.9rem; color: #5c6f87; }
+        .risk-bar { height: 8px; background: #d9e2ec; border-radius: 10px; margin: 0.75rem 0 0.25rem; overflow: hidden; }
+        .risk-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, #3b8bba, #1a5a8c); width: 0%; transition: width 0.6s ease; }
+        .flex-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
+        .tag { background: #eef2f7; border-radius: 8px; padding: 0.15rem 0.6rem; font-size: 0.75rem; font-weight: 600; color: #2b4c6e; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 1rem 0; }
+        th { text-align: left; background: #eef4fa; padding: 0.7rem 0.75rem; font-weight: 600; color: #1e3b5a; border-radius: 0.5rem 0.5rem 0 0; }
+        td { padding: 0.7rem 0.75rem; border-bottom: 1px solid #e2eaf1; vertical-align: top; }
+        tr:last-child td { border-bottom: none; }
+        .highlight { background: #f0f9ff; border-left: 4px solid #3b8bba; padding: 0.75rem 1rem; border-radius: 0.75rem; margin: 1rem 0; font-size: 0.95rem; }
+        .highlight-amber { background: #fff8e7; border-left: 4px solid #b16f1a; padding: 0.75rem 1rem; border-radius: 0.75rem; margin: 1rem 0; font-size: 0.95rem; }
+        .pill { background: #1a5a8c; color: white; border-radius: 30px; padding: 0.15rem 0.7rem; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+        .pill-green { background: #2a7a5c; }
+        .pill-amber { background: #b16f1a; }
+        .pill-gray { background: #6b7f9a; }
+        .pill-red { background: #b13a2a; }
+        .btn-group { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
+        .btn { border: 1px solid #cbd6e3; background: white; padding: 0.5rem 1rem; border-radius: 40px; font-size: 0.85rem; font-weight: 500; color: #1e3b5a; cursor: pointer; transition: 0.15s; }
+        .btn:hover { background: #eaf0f8; border-color: #a0b8d0; }
+        .btn.active { background: #1a5a8c; color: white; border-color: #1a5a8c; }
+        .detail-box { background: #f9fcff; border-radius: 1rem; padding: 1rem 1.25rem; margin-top: 1rem; border: 1px solid #d9e2ec; }
+        .small-text { font-size: 0.85rem; color: #4b6584; }
+        hr { border: none; border-top: 1px solid #d9e2ec; margin: 1.5rem 0; }
+        .hierarchy { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0.75rem 0; font-size: 0.9rem; }
+        .hierarchy span { background: #eef4fa; border-radius: 20px; padding: 0.25rem 0.8rem; font-weight: 500; }
+        .arrow { color: #6b7f9a; font-weight: 700; }
+        .variant-card { border-top: 4px solid #3b8bba; }
+        .variant-card.collapsing { border-top-color: #b13a2a; }
+        .variant-card.tip { border-top-color: #2a7a5c; }
+        .variant-card.cellular { border-top-color: #b16f1a; }
+        .variant-card.perihilar { border-top-color: #6b7f9a; }
+        .variant-card.nos { border-top-color: #1a5a8c; }
+        .prognosis-badge { font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.7rem; border-radius: 20px; display: inline-block; }
+        .prog-worst { background: #fbe9e7; color: #8e2a1a; }
+        .prog-best { background: #e3f2e9; color: #1a5a3a; }
+        .prog-intermediate { background: #fff3e0; color: #8a5a1a; }
+    </style>
+</head>
+<body>
+<div class="app">
+    <h1>🧬 FSGS Clinical Companion</h1>
+    <div class="subhead">
+        Interactive tool integrating Columbia classification (2004), variant-specific prognosis, transplant recurrence, drug plans, and genetic testing triggers.
+        Based on KDIGO 2021, KDOQI 2023, DUPLEX, and recent cohort data.
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="variants">🔬 Columbia Variants</button>
+        <button class="tab-btn" data-tab="risk">📊 Transplant Recurrence</button>
+        <button class="tab-btn" data-tab="drugs">💊 Drug Plans & Success</button>
+        <button class="tab-btn" data-tab="genetics">🧪 Genetic Testing</button>
+    </div>
+
+    <!-- PANEL 1: COLUMBIA VARIANTS -->
+    <div id="variants" class="panel active">
+        <div class="highlight">
+            <strong>Columbia classification (2004):</strong> Five mutually exclusive light-microscopy variants assigned by hierarchy.
+            <div class="hierarchy">
+                <span>Collapsing</span> <span class="arrow">→</span>
+                <span>Tip</span> <span class="arrow">→</span>
+                <span>Cellular</span> <span class="arrow">→</span>
+                <span>Perihilar</span> <span class="arrow">→</span>
+                <span>NOS</span>
+            </div>
+            A single collapsing glomerulus is enough to call the collapsing variant. The classification applies to both primary and secondary FSGS but <strong>cannot determine etiology</strong>—EM foot process effacement and clinical context are needed.
+        </div>
+
+        <div class="card-grid">
+            <!-- Collapsing -->
+            <div class="card variant-card collapsing">
+                <h3>💥 Collapsing <span class="prognosis-badge prog-worst">Worst prognosis</span></h3>
+                <div class="stat" style="font-size:1.4rem;">~13% remission</div>
+                <div class="stat-label">~65% ESRD; 3-year renal survival 33%</div>
+                <div class="risk-bar"><div class="risk-fill" style="width:13%"></div></div>
+                <p style="margin-top:0.75rem; font-size:0.9rem;"><strong>Histology:</strong> ≥1 glomerulus with segmental or global collapse of capillaries and <strong>hypertrophy/hyperplasia of overlying podocytes</strong>.</p>
+                <p style="margin-top:0.5rem; font-size:0.9rem;"><strong>Associations:</strong> HIV (HIVAN), APOL1 high-risk genotype, CMV, EBV, parvovirus, SARS-CoV-2; interferon, pamidronate; younger Black patients; severe nephrotic syndrome, renal insufficiency at presentation.</p>
+                <p style="margin-top:0.5rem; font-size:0.9rem;"><strong>Practical implication:</strong> Urgently look for secondary/genetic cause and treat it. Immunosuppression response poor (~14% rituximab response). Some series report up to 60% remission—primary collapsing may still get steroid/CNI trial.</p>
+            </div>
+
+            <!-- Tip -->
+            <div class="card variant-card tip">
+                <h3>🌱 Tip <span class="prognosis-badge prog-best">Best prognosis</span></h3>
+                <div class="stat" style="font-size:1.4rem;">~76% remission</div>
+                <div class="stat-label">~6% ESRD; steroid-responsive</div>
+                <div class="risk-bar"><div class="risk-fill" style="width:76%"></div></div>
+                <p style="margin-top:0.75rem; font-size:0.9rem;"><strong>Histology:</strong> ≥1 segmental lesion in the <strong>tip domain</strong> (outer 25% of tuft next to proximal tubule origin), with no collapsing or perihilar lesions.</p>
+                <p style="margin-top:0.5rem; font-size:0.9rem;"><strong>Associations:</strong> Usually primary, abrupt nephrotic syndrome, MCD-like; older, more often White patients; diffuse foot process effacement.</p>
+                <p style="margin-top:0.5rem; font-size:0.9rem;"><strong>Practical implication:</strong> Behaves like minimal change disease. High steroid responsiveness and best remission rates. Rituximab response best here (100% relapse-free survival in one cohort).</p>
+            </div>
+
+            <!-- Cellular -->
+            <div class="card variant-card cellular">
+                <h3>🔵 Cellular <span class="prognosis-badge prog-intermediate">Intermediate</span></h3>
+                <div class="stat" style="font-size:1.4rem;">~45% remission</div>
+                <div class="stat-label">~28% ESRD</div>
+                <div class="risk-bar"><div class="risk-fill" style="width:45%"></div></div>
+                <p style="margin-top:0.75rem; font-size:0.9rem;"><strong>Histology:</strong> ≥1 glomerulus with <strong>segmental endocapillary hypercellularity occluding lumina</strong>, ± foam cells and karyorrhexis; tip and collapsing excluded.</p>
+                <p style="margin-top:0.5rem; font-size:0.9rem;"><strong>Associations:</strong> Primary or secondary; least common; usually nephrotic; may be an early lesion or an unsampled tip/collapsing lesion.</p>
+                <p style="margin-top:0.5rem; font-size:0.9rem;"><strong>Practical implication:</strong> Usually nephrotic → standard primary FSGS treatment. Intermediate response (44–45% remission). Over-represented among rituximab non-responders.</p>
+            </div>
+
+            <!-- Perihilar -->
+            <div class="card variant-card perihilar">
+                <h3>🏛️ Perihilar <span class="prognosis-badge prog-intermediate">Intermediate</span></h3>
+                <div class="stat" style="font-size:1.4rem;">Adaptive/secondary</div>
+                <div class="stat-label">Responds to RAAS blockade</div>
+                <div class="risk-bar"><div class="risk-fill" style="width:30%"></div></div>
+                <p style="margin-top:0.75rem; font-size:0.9rem;"><strong>Histology:</strong> Perihilar sclerosis/hyalinosis in <strong>&gt;50% of segmentally sclerosed glomeruli</strong>; ≥1 with perihilar hyalinosis.</p>
+                <p style="margin-top:0.5rem; font-size:0.9rem;"><strong>Associations:</strong> Obesity, hypertension, reflux, reduced nephron mass; subnephrotic proteinuria, often with glomerulomegaly.</p>
+                <p style="margin-top:0.5rem; font-size:0.9rem;"><strong>Practical implication:</strong> Strongly suggests adaptive/secondary FSGS. Use <strong>supportive therapy only</strong> (RAAS blockade, SGLT2i, weight loss); avoid immunosuppression. Lowest remission rates.</p>
+            </div>
+
+            <!-- NOS -->
+            <div class="card variant-card nos">
+                <h3>❓ NOS <span class="prognosis-badge prog-intermediate">Intermediate</span></h3>
+                <div class="stat" style="font-size:1.4rem;">Most common</div>
+                <div class="stat-label">~42–48% of cases</div>
+                <div class="risk-bar"><div class="risk-fill" style="width:42%"></div></div>
+                <p style="margin-top:0.75rem; font-size:0.9rem;"><strong>Histology:</strong> Segmental matrix increase obliterating capillary lumina; other variants excluded.</p>
+                <p style="margin-top:0.5rem; font-size:0.9rem;"><strong>Associations:</strong> Primary or secondary; often subnephrotic; all variants converge to NOS with progression.</p>
+                <p style="margin-top:0.5rem; font-size:0.9rem;"><strong>Practical implication:</strong> Decide by etiology and nephrotic status. If primary, standard steroid → CNI pathway. Relatively good rituximab response in one cohort.</p>
+            </div>
+        </div>
+
+        <div class="highlight-amber">
+            <strong>⚠️ Key caveats:</strong>
+            <ul style="padding-left:1.2rem; margin-top:0.5rem;">
+                <li><strong>Prognostic gradient:</strong> best in tip, intermediate in cellular/perihilar/NOS, worst in collapsing. A Japanese registry (n=304) found <strong>no significant 5-year outcome difference between variants</strong>. <strong>Achieving proteinuria remission</strong> predicted outcome regardless of variant (adjusted HR 0.19).</li>
+                <li><strong>Mixed lesions and evolution:</strong> one biopsy can show several lesion types, and lesions evolve over time to NOS. Adequate sampling matters.</li>
+                <li><strong>Stronger outcome predictors than variant:</strong> interstitial fibrosis/tubular atrophy, global sclerosis, baseline creatinine, and remission status.</li>
+                <li><strong>Distinguishing etiology:</strong> diffuse foot process effacement on EM with nephrotic syndrome favors primary FSGS. Segmental effacement favors maladaptive FSGS. Genetic forms can show either.</li>
+                <li><strong>Guidelines do not assign different drug regimens by variant:</strong> treatment is based on etiology (primary vs genetic vs secondary) and phenotype (nephrotic or not). Variant informs expected response, urgency of workup, and persistence.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- PANEL 2: RECURRENCE RISK -->
+    <div id="risk" class="panel">
+        <div class="card-grid">
+            <div class="card">
+                <h3>📈 Overall Recurrence</h3>
+                <div class="stat" id="overallRecurrence">25–50%</div>
+                <div class="stat-label">Primary FSGS post-transplant</div>
+                <div class="risk-bar"><div class="risk-fill" style="width:40%"></div></div>
+                <p class="small-text" style="margin-top:0.75rem;">Reported ranges vary by cohort; ~25% in one recent single-center study, up to 50% predicted at 7 years in another.</p>
+            </div>
+            <div class="card">
+                <h3>⚠️ High-Risk Features</h3>
+                <ul style="padding-left:1.2rem; font-size:0.95rem;">
+                    <li><strong>Young age</strong> at presentation</li>
+                    <li><strong>Steroid-resistant</strong> nephrotic syndrome</li>
+                    <li>Higher <strong>BMI</strong> at transplant</li>
+                    <li>Lower <strong>serum albumin</strong> at transplant</li>
+                    <li>Recipient <strong>HLA DR7</strong> positivity</li>
+                </ul>
+                <p class="small-text" style="margin-top:0.5rem;">Based on transplant cohort analyses.</p>
+            </div>
+            <div class="card">
+                <h3>📉 Graft Loss Impact</h3>
+                <div class="stat">63% vs 96%</div>
+                <div class="stat-label">7-year death-censored graft survival<br>(recurrence vs no recurrence)</div>
+                <p class="small-text" style="margin-top:0.75rem;">Recurrence significantly worsens graft survival. Early recurrence (&lt;36 mo) associated with higher graft loss.</p>
+            </div>
+        </div>
+
+        <div class="highlight">
+            <strong>🔍 Interactive risk modifier:</strong> Select risk factors below to see estimated recurrence direction.
+        </div>
+        <div class="btn-group" id="riskModifiers">
+            <button class="btn" data-risk="steroidResistant">Steroid-resistant</button>
+            <button class="btn" data-risk="youngAge">Young age (&lt;18)</button>
+            <button class="btn" data-risk="lowAlbumin">Low albumin at Tx</button>
+            <button class="btn" data-risk="hlaDR7">HLA DR7 positive</button>
+            <button class="btn" data-risk="genetic">Genetic/APOL1 cause</button>
+        </div>
+        <div class="detail-box" id="riskDetail">
+            Select risk factors to see commentary. Baseline recurrence ~25–50%.
+        </div>
+    </div>
+
+    <!-- PANEL 3: DRUGS -->
+    <div id="drugs" class="panel">
+        <h2 style="font-size:1.4rem; font-weight:600; margin-bottom:0.5rem;">Drug efficacy & dosing plans</h2>
+        <p class="small-text" style="margin-bottom:1rem;">Success rates from key trials and guidelines. Click a drug for detailed plan.</p>
+
+        <div class="btn-group" id="drugSelector">
+            <button class="btn active" data-drug="steroids">Glucocorticoids</button>
+            <button class="btn" data-drug="cni">Calcineurin inhibitors</button>
+            <button class="btn" data-drug="sparsentan">Sparsentan</button>
+            <button class="btn" data-drug="inaxaplin">Inaxaplin</button>
+            <button class="btn" data-drug="rituximab">Rituximab</button>
+        </div>
+
+        <div id="drugPlan" class="detail-box">
+            <h3 style="display:flex; justify-content:space-between;">Prednisone / Glucocorticoids <span class="pill">First-line primary FSGS</span></h3>
+            <table>
+                <tr><th>Parameter</th><th>Detail</th></tr>
+                <tr><td>Dose</td><td>0.5–2 mg/kg/day (oral)</td></tr>
+                <tr><td>Duration</td><td>4–6 months before declaring steroid resistance</td></tr>
+                <tr><td>Success / response</td><td>Variable; ~50–70% steroid-sensitive in primary FSGS. Steroid-resistant patients require CNI.</td></tr>
+                <tr><td>Notes</td><td>KDIGO recommends high-dose glucocorticoids first-line for primary FSGS with nephrotic syndrome. Prolonged use carries toxicity.</td></tr>
+            </table>
+            <p class="small-text">Source: KDIGO 2021 guideline & KDOQI commentary.</p>
+        </div>
+
+        <hr>
+        <h3 style="font-size:1.1rem; margin-bottom:0.5rem;">📊 Comparative success snapshot</h3>
+        <table>
+            <tr><th>Drug</th><th>Key outcome</th><th>Population</th></tr>
+            <tr><td>Prednisone</td><td>Steroid sensitivity ~50–70%</td><td>Primary FSGS, nephrotic</td></tr>
+            <tr><td>Cyclosporine / Tacrolimus</td><td>Recommended ≥6 months for steroid-resistant</td><td>Steroid-resistant / contraindicated</td></tr>
+            <tr><td>Sparsentan (DUPLEX)</td><td>42% partial remission vs 26% irbesartan (36 wk)</td><td>FSGS (non-nephrotic, proteinuric)</td></tr>
+            <tr><td>Inaxaplin (phase 2a)</td><td>−47.6% mean UPCR at 13 weeks</td><td>APOL1 G1/G2 FSGS</td></tr>
+            <tr><td>Rituximab (variant-specific)</td><td>Tip: 100% relapse-free; collapsing: ~14%; cellular: over-represented non-responders</td><td>Primary FSGS, variant-dependent</td></tr>
+        </table>
+        <p class="small-text">Sparsentan data from DUPLEX trial; Inaxaplin from NEJM phase 2a; variant data from Mohamed et al. 2025 and Kwon et al. 2014.</p>
+    </div>
+
+    <!-- PANEL 4: GENETICS -->
+    <div id="genetics" class="panel">
+        <h2 style="font-size:1.4rem; font-weight:600; margin-bottom:0.5rem;">When to order genetic testing?</h2>
+        <div class="card-grid">
+            <div class="card">
+                <h3>✅ Strongly indicated</h3>
+                <ul style="padding-left:1.2rem;">
+                    <li><strong>Steroid-resistant</strong> nephrotic syndrome / FSGS</li>
+                    <li><strong>Early onset</strong> (childhood / young adult)</li>
+                    <li><strong>Family history</strong> of FSGS or ESKD</li>
+                    <li><strong>APOL1 high-risk</strong> suspicion (African ancestry, collapsing FSGS, HIVAN)</li>
+                </ul>
+                <p class="small-text" style="margin-top:0.5rem;">Genetic variants detected in 35.5% of SRNS-FSGS or FSGS-UC in one adult cohort; 41.7% in SRNS-FSGS specifically. KDIGO: steroid resistance should prompt genetic testing.</p>
+            </div>
+            <div class="card">
+                <h3>🧬 Why test?</h3>
+                <ul style="padding-left:1.2rem;">
+                    <li>Avoid futile immunosuppression</li>
+                    <li>Predict <strong>low recurrence</strong> after transplant (monogenic causes)</li>
+                    <li>Inform living-donor evaluation (APOL1)</li>
+                    <li>Identify trial eligibility (e.g., inaxaplin for APOL1)</li>
+                </ul>
+                <p class="small-text" style="margin-top:0.5rem;">KDIGO 2025 Controversies Conference: genotype alone not actionable, but supports risk stratification and donor evaluation.</p>
+            </div>
+            <div class="card">
+                <h3>🧪 APOL1 genotyping</h3>
+                <p>~13% of African Americans carry two risk alleles (G1/G2). Two variants raise FSGS risk <strong>10–17-fold</strong>.</p>
+                <p style="margin-top:0.75rem;">Consider in: collapsing FSGS, HIVAN, family history, transplant donor evaluation.</p>
+                <p class="small-text" style="margin-top:0.5rem;">A “second hit” (e.g., interferon, HIV) often required.</p>
+            </div>
+        </div>
+        <div class="highlight">
+            <strong>Practical trigger:</strong> Any patient with FSGS who is <strong>steroid-resistant</strong> or has a <strong>family history</strong> should be offered genetic testing. In adults, panel testing (COL4A3-5, NPHS2, INF2, etc.) yields ~35% diagnostic rate.
+        </div>
+    </div>
+
+    <hr>
+    <p class="small-text" style="text-align:center; color:#6b7f9a;">Interactive clinical reference. Always individualize care. Data compiled from KDIGO, KDOQI, DUPLEX, phase 2a inaxaplin, Columbia classification, and variant cohort studies.</p>
+</div>
+
+<script>
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    // ---- Risk modifier interactive ----
+    const riskButtons = document.querySelectorAll('#riskModifiers .btn');
+    const riskDetail = document.getElementById('riskDetail');
+    const riskStates = {
+        steroidResistant: false,
+        youngAge: false,
+        lowAlbumin: false,
+        hlaDR7: false,
+        genetic: false
+    };
+
+    function updateRiskDetail() {
+        let points = 0;
+        let notes = [];
+        if (riskStates.steroidResistant) { points += 2; notes.push('steroid-resistant nephrotic syndrome (strong risk factor)'); }
+        if (riskStates.youngAge) { points += 1.5; notes.push('young age at presentation'); }
+        if (riskStates.lowAlbumin) { points += 1; notes.push('low serum albumin at transplant'); }
+        if (riskStates.hlaDR7) { points += 1; notes.push('HLA DR7 positivity'); }
+        if (riskStates.genetic) {
+            points -= 2;
+            notes.push('monogenic/genetic cause (predicts LOWER recurrence after transplant)');
+        }
+
+        if (points > 2) {
+            riskDetail.innerHTML = `<strong>⚠️ Higher-risk profile</strong> (cumulative modifier +${points.toFixed(1)}). Risk factors: ${notes.join('; ')}. Consider closer monitoring and preemptive discussion.`;
+        } else if (points < 0) {
+            riskDetail.innerHTML = `<strong>🧬 Lower recurrence likelihood</strong> (modifier ${points.toFixed(1)}). ${notes.join('; ')}. Genetic testing may spare immunosuppression and predicts low recurrence.`;
+        } else if (points > 0) {
+            riskDetail.innerHTML = `<strong>Modestly elevated risk</strong> (modifier +${points.toFixed(1)}). Factors: ${notes.join('; ')}.`;
+        } else {
+            riskDetail.innerHTML = 'Baseline recurrence risk ~25–50%. Select risk factors for commentary.';
+        }
+    }
+
+    riskButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const key = btn.dataset.risk;
+            riskStates[key] = !riskStates[key];
+            btn.classList.toggle('active');
+            updateRiskDetail();
+        });
+    });
+
+    // ---- Drug selector ----
+    const drugButtons = document.querySelectorAll('#drugSelector .btn');
+    const drugPlan = document.getElementById('drugPlan');
+
+    const drugData = {
+        steroids: `
+            <h3 style="display:flex; justify-content:space-between;">Prednisone / Glucocorticoids <span class="pill">First-line primary FSGS</span></h3>
+            <table>
+                <tr><th>Parameter</th><th>Detail</th></tr>
+                <tr><td>Dose</td><td>0.5–2 mg/kg/day (oral)</td></tr>
+                <tr><td>Duration</td><td>4–6 months before declaring steroid resistance</td></tr>
+                <tr><td>Success / response</td><td>Variable; ~50–70% steroid-sensitive in primary FSGS. Steroid-resistant patients require CNI.</td></tr>
+                <tr><td>Notes</td><td>KDIGO recommends high-dose glucocorticoids first-line for primary FSGS with nephrotic syndrome. Prolonged use carries toxicity.</td></tr>
+            </table>
+            <p class="small-text">Source: KDIGO 2021 guideline & KDOQI commentary.</p>
+        `,
+        cni: `
+            <h3 style="display:flex; justify-content:space-between;">Cyclosporine or Tacrolimus <span class="pill">Steroid-resistant FSGS</span></h3>
+            <table>
+                <tr><th>Parameter</th><th>Detail</th></tr>
+                <tr><td>Dose</td><td>Cyclosporine: 3–5 mg/kg/day (target levels); Tacrolimus: 0.1–0.2 mg/kg/day (trough 5–10 ng/mL)</td></tr>
+                <tr><td>Duration</td><td>At least 6 months (KDIGO recommendation)</td></tr>
+                <tr><td>Success / response</td><td>Remission rates ~50–70% in steroid-resistant FSGS; relapse common after stopping. Note: Cochrane trials did not screen for genetic mutations—benefit in non-genetic disease may be underestimated.</td></tr>
+                <tr><td>Notes</td><td>Recommended for steroid-resistant primary FSGS or when steroids contraindicated. Steroid resistance should prompt genetic testing.</td></tr>
+            </table>
+            <p class="small-text">Source: KDIGO 2021; Cochrane review; Berke et al. 2026.</p>
+        `,
+        sparsentan: `
+            <h3 style="display:flex; justify-content:space-between;">Sparsentan <span class="pill-green">FDA-approved for FSGS proteinuria</span></h3>
+            <table>
+                <tr><th>Parameter</th><th>Detail</th></tr>
+                <tr><td>Dose</td><td>400 mg oral once daily (titrated from 200 mg)</td></tr>
+                <tr><td>Duration</td><td>Ongoing; DUPLEX trial evaluated through 108 weeks</td></tr>
+                <tr><td>Success / response</td><td>Partial remission: 42.0% vs 26.0% with irbesartan at 36 weeks (P=0.009), sustained through 108 weeks.</td></tr>
+                <tr><td>Notes</td><td>Indicated for proteinuria reduction in FSGS (non-nephrotic). No eGFR slope benefit at 2 years in DUPLEX.</td></tr>
+            </table>
+            <p class="small-text">Source: DUPLEX trial, NEJM 2023; FDA label.</p>
+        `,
+        inaxaplin: `
+            <h3 style="display:flex; justify-content:space-between;">Inaxaplin (VX-147) <span class="pill-amber">Investigational</span></h3>
+            <table>
+                <tr><th>Parameter</th><th>Detail</th></tr>
+                <tr><td>Dose</td><td>15 mg daily x2 weeks, then 45 mg daily (phase 2a regimen)</td></tr>
+                <tr><td>Duration</td><td>13 weeks in phase 2a; phase 2/3 AMPLITUDE trial ongoing (48 weeks)</td></tr>
+                <tr><td>Success / response</td><td>Mean UPCR reduction −47.6% (95% CI −60.0 to −31.3) at week 13 in adherent patients.</td></tr>
+                <tr><td>Notes</td><td>Oral APOL1 channel inhibitor for patients with two APOL1 variants (G1/G2) and FSGS. Adverse events mild/moderate.</td></tr>
+            </table>
+            <p class="small-text">Source: NEJM phase 2a, Egbuna et al. 2023.</p>
+        `,
+        rituximab: `
+            <h3 style="display:flex; justify-content:space-between;">Rituximab <span class="pill">Variant-dependent response</span></h3>
+            <table>
+                <tr><th>Parameter</th><th>Detail</th></tr>
+                <tr><td>Dose</td><td>375 mg/m² IV weekly x4 or 1 g IV x2 (14 days apart); used in combination with PLEX for recurrence</td></tr>
+                <tr><td>Duration</td><td>Course-based; response assessed by proteinuria</td></tr>
+                <tr><td>Success / response</td><td><strong>Tip variant:</strong> 100% relapse-free survival in one cohort. <strong>Collapsing:</strong> ~14% response. <strong>Cellular:</strong> over-represented among non-responders. <strong>NOS:</strong> relatively good response in one cohort.</td></tr>
+                <tr><td>Notes</td><td>Not guideline-endorsed for primary FSGS; used off-label for recurrence. In pediatric recurrence, anti-CD20 agents associated with complete remission. Evidence weaker than PLEX but combination may improve response.</td></tr>
+            </table>
+            <p class="small-text">Sources: Mohamed et al. Kidney Int Rep 2025; Kwon et al. BMC Nephrol 2014; ISN cohort; pediatric multicenter.</p>
+        `
+    };
+
+    drugButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            drugButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const drug = btn.dataset.drug;
+            drugPlan.innerHTML = drugData[drug];
+        });
+    });
+</script>
+</body>
+</html>
